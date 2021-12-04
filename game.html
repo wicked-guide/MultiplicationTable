@@ -12,39 +12,66 @@
   <body>
     <section id="app" class="container-fluid">
       <!-- header -->
-      <section class="header">point:</section>
+      <section class="header d-flex justify-content-between">
+        <div>Point:{{point}}</div>
+        <!-- Button trigger modal -->
+        <button
+          type="button"
+          class="btn btn-primary"
+          data-bs-toggle="modal"
+          data-bs-target="#exampleModal"
+        >
+          選択
+        </button>
+
+        <div class="btn btn-primary btn-sm" @click="allreset">allreset</div>
+        <div></div>
+      </section>
 
       <!-- ゲームエリア -->
       <section class="row">
         <!-- 問題カード -->
-        <section class="col-6 alert-info grid p-3"></section>
+        <section class="col-6 alert-info grid p-3">
+          <div
+            v-for="(q,index) in card"
+            class="card"
+            :class="{ 'bg-info': q.qback ,back:q.qback,hidden:q.qclear}"
+            @click="qflip(index)"
+          >
+            <span v-show="q.qback"></span>
+            <span v-show="!q.qback" class="front m-auto">{{q.qize}}</span>
+          </div>
+          <!-- <div id="modal-overlay"></div> -->
+        </section>
 
         <!-- 正解カード -->
-        <section class="col-6 alert-warning grid p-3"></section>
+        <section class="col-6 alert-warning grid p-3">
+          <div
+            v-for="(a,index) in card"
+            class="card"
+            :class="{ 'bg-warning': a.aback ,back:a.aback,hidden:a.aclear}"
+            @click="aflip(index)"
+          >
+            <span v-show="a.aback"></span>
+            <span v-show="!a.aback" class="front m-auto">{{a.answer}}</span>
+          </div>
+        </section>
       </section>
-
-      <!-- Button trigger modal -->
-      <!-- <button
-        type="button"
-        class="btn btn-primary"
-        data-bs-toggle="modal"
-        data-bs-target="#exampleModal"
-      >
-        Launch demo modal
-      </button> -->
 
       <!-- Modal -->
       <div
-        class="modal fade"
+        class="modal"
         id="exampleModal"
         tabindex="-1"
         aria-labelledby="exampleModalLabel"
         aria-hidden="true"
       >
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+              <h5 class="modal-title" id="exampleModalLabel">
+                title:{{scope}}
+              </h5>
               <button
                 type="button"
                 class="btn-close"
@@ -52,17 +79,47 @@
                 aria-label="Close"
               ></button>
             </div>
-            <div class="modal-body">...</div>
+
+            <!-- 範囲選択 -->
+            <div class="modal-body">
+              <table class="table">
+                <tr>
+                  <td>
+                    <div class="form-check">
+                      <input
+                        class="form-check-input"
+                        type="checkbox"
+                        id="all"
+                      />
+                      <label class="form-check-label" for="all"> all </label>
+                    </div>
+                  </td>
+                  <!-- <td></td> -->
+                </tr>
+                <tr v-for="i in renge">
+                  <td>
+                    <div class="form-check">
+                      <input
+                        v-model="scope"
+                        class="form-check-input"
+                        type="checkbox"
+                        :id="i"
+                        :value="i"
+                      />
+                      <label class="form-check-label" :for="i"> {{i}} </label>
+                    </div>
+                  </td>
+                </tr>
+              </table>
+            </div>
+
             <div class="modal-footer">
               <button
                 type="button"
-                class="btn btn-secondary"
+                class="btn btn-primary"
                 data-bs-dismiss="modal"
               >
-                Close
-              </button>
-              <button type="button" class="btn btn-primary">
-                Save changes
+                Start
               </button>
             </div>
           </div>
@@ -71,11 +128,97 @@
     </section>
 
     <script src="/js/bootstrap.bundle.js"></script>
+    <script src="/js/card.js"></script>
     <script>
+      const flip = new Audio("/asset/flip.mp3");
+      const good = new Audio("/asset/good.mp3");
       var app = new Vue({
         el: "#app",
         data: {
-          test: "tesutote",
+          //  基礎データ
+          renge: [2, 3, 4, 5, 6, 7, 8, 9],
+          scope: [2, 3, 4, 5, 6, 7, 8, 9],
+          qselect: false,
+          aselect: false,
+          qindex: "",
+          aindex: "",
+          qnum: "",
+          anum: "",
+          point: 0,
+          // カード
+          card: card,
+        },
+        methods: {
+          qflip(index) {
+            if (this.qselect == true) {
+            } else {
+              flip.play();
+              this.card[index].qback = !this.card[index].qback;
+              this.qindex = index;
+              this.qnum = this.card[index].answer;
+              this.qselect = true;
+              if (this.qnum != "" && this.anum != "") {
+                this.check();
+              }
+            }
+          },
+          aflip(index) {
+            if (this.aselect == true) {
+            } else {
+              flip.play();
+              this.card[index].aback = !this.card[index].aback;
+              this.aindex = index;
+              this.anum = this.card[index].answer;
+              this.aselect = true;
+              if (this.qnum != "" && this.anum != "") {
+                this.check();
+              }
+            }
+          },
+          check() {
+            console.log("check");
+            if (this.qnum == this.anum) {
+              setTimeout(() => {
+                this.point += 1;
+                good.play();
+              }, 700);
+              setTimeout(() => {
+                this.card[this.qindex].qclear = true;
+                this.card[this.aindex].aclear = true;
+              }, 1200);
+            }
+            setTimeout(() => {
+              this.reset();
+            }, 1200);
+          },
+          reset() {
+            console.log("reset");
+            this.card.forEach((element) => {
+              element.qback = true;
+              element.aback = true;
+            });
+            this.qselect = false;
+            this.aselect = false;
+            this.qindex = "";
+            this.aindex = "";
+            this.qnum = "";
+            this.anum = "";
+          },
+          allreset() {
+            this.card.forEach((element) => {
+              element.qback = true;
+              element.aback = true;
+              element.qclear = false;
+              element.aclear = false;
+            });
+            this.qselect = false;
+            this.aselect = false;
+            this.qindex = "";
+            this.aindex = "";
+            this.qnum = "";
+            this.anum = "";
+            this.point = 0;
+          },
         },
       });
     </script>
@@ -88,10 +231,15 @@
       }
 
       .card {
-        /* height: 3rem; */
+        height: 4rem;
         text-align: center;
-        padding: 0.5rem;
+        /* padding: 0; */
         cursor: pointer;
+        transform: rotateY(0deg);
+        transition: transform 0.3s;
+      }
+
+      .back {
         background-size: 60px 55px;
         background-image: radial-gradient(
             transparent 10px,
@@ -109,6 +257,26 @@
         transform: rotateY(180deg);
         transition: transform 0.3s;
       }
+
+      .hidden {
+        visibility: hidden;
+      }
+
+      /* #modal-overlay {
+        z-index: 1;
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 120%;
+        background-color: rgba(0, 0, 0, 0.75);
+        width: 100%;
+        height: 120%;
+        position: fixed;
+        top: 0;
+        left: 0;
+      } */
     </style>
   </body>
 </html>
