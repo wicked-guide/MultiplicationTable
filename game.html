@@ -138,7 +138,7 @@
         data: {
           //  基礎データ
           renge: [2, 3, 4, 5, 6, 7, 8, 9],
-          scope: [2, 3, 4, 5, 6, 7, 8, 9],
+          scope: [2, 4],
           qselect: false,
           aselect: false,
           qindex: "",
@@ -217,10 +217,24 @@
             this.qnum = "";
             this.anum = "";
             this.point = 0;
+            this.shuffle();
+          },
+          //  ランダム化
+          shuffle: function (search_cards) {
+            for (let i = this.search_cards.length - 1; i > 0; i--) {
+              let r = Math.floor(Math.random() * (i + 1));
+              let tmp = this.search_cards[i];
+              this.search_cards[i] = this.search_cards[r];
+              this.search_cards[r] = tmp;
+            }
+            console.log(this.search_cards);
+            return search_cards;
           },
           modalopen() {},
         },
-        mounted() {},
+        mounted() {
+          this.shuffle();
+        },
         computed: {
           // モーダル全選択
           selectAll: {
