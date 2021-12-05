@@ -9,6 +9,7 @@
     <script src="/js/vue.js"></script>
     <title>Multiplication Table</title>
   </head>
+
   <body>
     <section id="app" class="container-fluid">
       <!-- header -->
@@ -19,7 +20,8 @@
           type="button"
           class="btn btn-primary"
           data-bs-toggle="modal"
-          data-bs-target="#exampleModal"
+          data-bs-target="#scopeModal"
+          @click="allreset"
         >
           選択
         </button>
@@ -33,7 +35,7 @@
         <!-- 問題カード -->
         <section class="col-6 alert-info grid p-3">
           <div
-            v-for="(q,index) in card"
+            v-for="(q,index) in search_cards"
             class="card"
             :class="{ 'bg-info': q.qback ,back:q.qback,hidden:q.qclear}"
             @click="qflip(index)"
@@ -47,7 +49,7 @@
         <!-- 正解カード -->
         <section class="col-6 alert-warning grid p-3">
           <div
-            v-for="(a,index) in card"
+            v-for="(a,index) in search_cards"
             class="card"
             :class="{ 'bg-warning': a.aback ,back:a.aback,hidden:a.aclear}"
             @click="aflip(index)"
@@ -61,17 +63,15 @@
       <!-- Modal -->
       <div
         class="modal"
-        id="exampleModal"
+        id="scopeModal"
         tabindex="-1"
-        aria-labelledby="exampleModalLabel"
+        aria-labelledby="scopeModalLabel"
         aria-hidden="true"
       >
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
             <div class="modal-header">
-              <h5 class="modal-title" id="exampleModalLabel">
-                title:{{scope}}
-              </h5>
+              <h5 class="modal-title" id="scopeModalLabel">title:{{scope}}</h5>
               <button
                 type="button"
                 class="btn-close"
@@ -82,7 +82,7 @@
 
             <!-- 範囲選択 -->
             <div class="modal-body">
-              <table class="table">
+              <table class="table w-50 m-auto">
                 <tr>
                   <td>
                     <div class="form-check">
@@ -90,6 +90,7 @@
                         class="form-check-input"
                         type="checkbox"
                         id="all"
+                        v-model="selectAll"
                       />
                       <label class="form-check-label" for="all"> all </label>
                     </div>
@@ -113,7 +114,7 @@
               </table>
             </div>
 
-            <div class="modal-footer">
+            <div class="modal-footer justify-content-center">
               <button
                 type="button"
                 class="btn btn-primary"
@@ -153,9 +154,9 @@
             if (this.qselect == true) {
             } else {
               flip.play();
-              this.card[index].qback = !this.card[index].qback;
+              this.search_cards[index].qback = !this.search_cards[index].qback;
               this.qindex = index;
-              this.qnum = this.card[index].answer;
+              this.qnum = this.search_cards[index].answer;
               this.qselect = true;
               if (this.qnum != "" && this.anum != "") {
                 this.check();
@@ -166,9 +167,9 @@
             if (this.aselect == true) {
             } else {
               flip.play();
-              this.card[index].aback = !this.card[index].aback;
+              this.search_cards[index].aback = !this.search_cards[index].aback;
               this.aindex = index;
-              this.anum = this.card[index].answer;
+              this.anum = this.search_cards[index].answer;
               this.aselect = true;
               if (this.qnum != "" && this.anum != "") {
                 this.check();
@@ -176,15 +177,14 @@
             }
           },
           check() {
-            console.log("check");
             if (this.qnum == this.anum) {
               setTimeout(() => {
                 this.point += 1;
                 good.play();
               }, 700);
               setTimeout(() => {
-                this.card[this.qindex].qclear = true;
-                this.card[this.aindex].aclear = true;
+                this.search_cards[this.qindex].qclear = true;
+                this.search_cards[this.aindex].aclear = true;
               }, 1200);
             }
             setTimeout(() => {
@@ -192,8 +192,7 @@
             }, 1200);
           },
           reset() {
-            console.log("reset");
-            this.card.forEach((element) => {
+            this.search_cards.forEach((element) => {
               element.qback = true;
               element.aback = true;
             });
@@ -205,7 +204,7 @@
             this.anum = "";
           },
           allreset() {
-            this.card.forEach((element) => {
+            this.search_cards.forEach((element) => {
               element.qback = true;
               element.aback = true;
               element.qclear = false;
@@ -218,6 +217,41 @@
             this.qnum = "";
             this.anum = "";
             this.point = 0;
+          },
+          modalopen() {},
+        },
+        mounted() {},
+        computed: {
+          // モーダル全選択
+          selectAll: {
+            get() {
+              if (this.scope.length == 8) {
+                return true;
+              } else {
+                return false;
+              }
+            },
+            set(value) {
+              if (value) {
+                this.scope = [2, 3, 4, 5, 6, 7, 8, 9];
+              } else {
+                this.scope = [];
+              }
+            },
+          },
+          search_cards() {
+            return card.filter((s) => {
+              return (
+                s.type.includes(this.scope[0]) ||
+                s.type.includes(this.scope[1]) ||
+                s.type.includes(this.scope[2]) ||
+                s.type.includes(this.scope[3]) ||
+                s.type.includes(this.scope[4]) ||
+                s.type.includes(this.scope[5]) ||
+                s.type.includes(this.scope[6]) ||
+                s.type.includes(this.scope[7])
+              );
+            });
           },
         },
       });
