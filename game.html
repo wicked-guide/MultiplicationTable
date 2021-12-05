@@ -13,25 +13,31 @@
   <body>
     <section id="app" class="container-fluid">
       <!-- header -->
-      <section class="header d-flex justify-content-between">
-        <div>Point:{{point}}</div>
+      <section class="header row">
         <!-- Button trigger modal -->
-        <button
-          type="button"
-          class="btn btn-primary"
-          data-bs-toggle="modal"
-          data-bs-target="#scopeModal"
-          @click="allreset"
-        >
-          選択
-        </button>
+        <div class="col d-flex">
+          <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#scopeModal"
+            @click="allreset"
+          >
+            Stage Select
+          </button>
+          <span v-for="s in scope" class="badge bg-secondary mx-1 my-auto"
+            >{{s}}</span
+          >
+        </div>
 
-        <div class="btn btn-primary btn-sm" @click="allreset">allreset</div>
-        <div></div>
+        <div class="col text-center m-auto">Point:{{point}}</div>
+        <section class="col text-end m-auto">
+          <div class="btn btn-primary btn-sm" @click="allreset">ReStart</div>
+        </section>
       </section>
 
       <!-- ゲームエリア -->
-      <section class="row">
+      <section class="row" v-show="point!=search_cards.length">
         <!-- 問題カード -->
         <section class="col-6 alert-info grid p-3">
           <div
@@ -49,7 +55,7 @@
         <!-- 正解カード -->
         <section class="col-6 alert-warning grid p-3">
           <div
-            v-for="(a,index) in search_cards"
+            v-for="(a,index) in search_cards2"
             class="card"
             :class="{ 'bg-warning': a.aback ,back:a.aback,hidden:a.aclear}"
             @click="aflip(index)"
@@ -59,7 +65,10 @@
           </div>
         </section>
       </section>
-
+      <section v-show="point==search_cards.length" class="text-center mt-5">
+        <h1 class="text-success">Congratulations!</h1>
+        <div class="hidden">{{clear}}</div>
+      </section>
       <!-- Modal -->
       <div
         class="modal"
@@ -67,10 +76,11 @@
         tabindex="-1"
         aria-labelledby="scopeModalLabel"
         aria-hidden="true"
+        data-bs-backdrop="static"
       >
         <div class="modal-dialog modal-dialog-centered">
           <div class="modal-content">
-            <div class="modal-header">
+            <!-- <div class="modal-header">
               <h5 class="modal-title" id="scopeModalLabel">title:{{scope}}</h5>
               <button
                 type="button"
@@ -78,13 +88,13 @@
                 data-bs-dismiss="modal"
                 aria-label="Close"
               ></button>
-            </div>
+            </div> -->
 
             <!-- 範囲選択 -->
             <div class="modal-body">
               <table class="table w-50 m-auto">
                 <tr>
-                  <td>
+                  <td colspan="2">
                     <div class="form-check">
                       <input
                         class="form-check-input"
@@ -95,9 +105,8 @@
                       <label class="form-check-label" for="all"> all </label>
                     </div>
                   </td>
-                  <!-- <td></td> -->
                 </tr>
-                <tr v-for="i in renge">
+                <tr v-for="i in 4">
                   <td>
                     <div class="form-check">
                       <input
@@ -105,9 +114,21 @@
                         class="form-check-input"
                         type="checkbox"
                         :id="i"
-                        :value="i"
+                        :value="i+1"
                       />
-                      <label class="form-check-label" :for="i"> {{i}} </label>
+                      <label class="form-check-label" :for="i"> {{i+1}} </label>
+                    </div>
+                  </td>
+                  <td>
+                    <div class="form-check">
+                      <input
+                        v-model="scope"
+                        class="form-check-input"
+                        type="checkbox"
+                        :id="i"
+                        :value="i+5"
+                      />
+                      <label class="form-check-label" :for="i"> {{i+5}} </label>
                     </div>
                   </td>
                 </tr>
@@ -119,6 +140,7 @@
                 type="button"
                 class="btn btn-primary"
                 data-bs-dismiss="modal"
+                @click="allreset"
               >
                 Start
               </button>
@@ -133,12 +155,13 @@
     <script>
       const flip = new Audio("/asset/flip.mp3");
       const good = new Audio("/asset/good.mp3");
+      const congratulations = new Audio("/asset/congratulations.mp3");
       var app = new Vue({
         el: "#app",
         data: {
           //  基礎データ
           renge: [2, 3, 4, 5, 6, 7, 8, 9],
-          scope: [2, 4],
+          scope: [2],
           qselect: false,
           aselect: false,
           qindex: "",
@@ -167,9 +190,10 @@
             if (this.aselect == true) {
             } else {
               flip.play();
-              this.search_cards[index].aback = !this.search_cards[index].aback;
+              this.search_cards2[index].aback =
+                !this.search_cards2[index].aback;
               this.aindex = index;
-              this.anum = this.search_cards[index].answer;
+              this.anum = this.search_cards2[index].answer;
               this.aselect = true;
               if (this.qnum != "" && this.anum != "") {
                 this.check();
@@ -184,7 +208,7 @@
               }, 700);
               setTimeout(() => {
                 this.search_cards[this.qindex].qclear = true;
-                this.search_cards[this.aindex].aclear = true;
+                this.search_cards2[this.aindex].aclear = true;
               }, 1200);
             }
             setTimeout(() => {
@@ -218,6 +242,7 @@
             this.anum = "";
             this.point = 0;
             this.shuffle();
+            this.shuffle2();
           },
           //  ランダム化
           shuffle: function (search_cards) {
@@ -227,13 +252,26 @@
               this.search_cards[i] = this.search_cards[r];
               this.search_cards[r] = tmp;
             }
-            console.log(this.search_cards);
             return search_cards;
           },
+          shuffle2: function (search_cards2) {
+            for (let i = this.search_cards2.length - 1; i > 0; i--) {
+              let r = Math.floor(Math.random() * (i + 1));
+              let tmp = this.search_cards2[i];
+              this.search_cards2[i] = this.search_cards2[r];
+              this.search_cards2[r] = tmp;
+            }
+            return search_cards2;
+          },
           modalopen() {},
+          cong() {
+            const congratulations = new Audio("/asset/congratulations.mp3");
+            congratulations.play();
+          },
         },
         mounted() {
           this.shuffle();
+          this.shuffle2();
         },
         computed: {
           // モーダル全選択
@@ -266,6 +304,25 @@
                 s.type.includes(this.scope[7])
               );
             });
+          },
+          search_cards2() {
+            return card.filter((s) => {
+              return (
+                s.type.includes(this.scope[0]) ||
+                s.type.includes(this.scope[1]) ||
+                s.type.includes(this.scope[2]) ||
+                s.type.includes(this.scope[3]) ||
+                s.type.includes(this.scope[4]) ||
+                s.type.includes(this.scope[5]) ||
+                s.type.includes(this.scope[6]) ||
+                s.type.includes(this.scope[7])
+              );
+            });
+          },
+          clear() {
+            if (this.point == this.search_cards.length) {
+              return congratulations.play();
+            }
           },
         },
       });
