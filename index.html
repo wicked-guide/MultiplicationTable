@@ -153,9 +153,9 @@
     <script src="js/bootstrap.bundle.js"></script>
     <script src="js/card.js"></script>
     <script>
-      const flip = new Audio("/asset/flip.mp3");
-      const good = new Audio("/asset/good.mp3");
-      const congratulations = new Audio("/asset/congratulations.mp3");
+      const flip = new Audio("asset/flip.mp3");
+      const good = new Audio("asset/good.mp3");
+      const congratulations = new Audio("asset/congratulations.mp3");
       var app = new Vue({
         el: "#app",
         data: {
@@ -263,9 +263,8 @@
             }
             return search_cards2;
           },
-          modalopen() {},
-          cong() {
-            const congratulations = new Audio("/asset/congratulations.mp3");
+          congratulations() {
+            const congratulations = new Audio("asset/congratulations.mp3");
             congratulations.play();
           },
         },
