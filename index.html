@@ -42,7 +42,7 @@
         <section class="col-6 alert-info grid p-3">
           <div
             v-for="(q,index) in search_cards"
-            class="card"
+            class="card border-5"
             :class="{ 'bg-info': q.qback ,back:q.qback,hidden:q.qclear}"
             @click="qflip(index)"
           >
@@ -56,7 +56,7 @@
         <section class="col-6 alert-warning grid p-3">
           <div
             v-for="(a,index) in search_cards2"
-            class="card"
+            class="card border-5"
             :class="{ 'bg-warning': a.aback ,back:a.aback,hidden:a.aclear}"
             @click="aflip(index)"
           >
@@ -72,6 +72,7 @@
         <h1 class="text-success">Congratulations!</h1>
         <div class="hidden">{{clear}}</div>
       </section>
+
       <!-- Modal -->
       <div
         class="modal"
