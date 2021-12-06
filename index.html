@@ -25,7 +25,7 @@
           >
             Stage Select
           </button>
-          <span v-for="s in scope" class="badge bg-secondary mx-1 my-auto"
+          <span v-for="s in scope" class="badge bg-info mx-1 my-auto"
             >{{s}}</span
           >
         </div>
@@ -65,7 +65,10 @@
           </div>
         </section>
       </section>
-      <section v-show="point==search_cards.length" class="text-center mt-5">
+      <section
+        v-show="point!=0 && point==search_cards.length"
+        class="text-center mt-5"
+      >
         <h1 class="text-success">Congratulations!</h1>
         <div class="hidden">{{clear}}</div>
       </section>
@@ -78,7 +81,7 @@
         aria-hidden="true"
         data-bs-backdrop="static"
       >
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
           <div class="modal-content">
             <!-- <div class="modal-header">
               <h5 class="modal-title" id="scopeModalLabel">title:{{scope}}</h5>
@@ -92,7 +95,7 @@
 
             <!-- 範囲選択 -->
             <div class="modal-body">
-              <table class="table w-50 m-auto">
+              <table class="table w-75 m-auto">
                 <tr>
                   <td colspan="2">
                     <div class="form-check">
@@ -267,10 +270,18 @@
             const congratulations = new Audio("asset/congratulations.mp3");
             congratulations.play();
           },
+          modalopen() {
+            var myModal = new bootstrap.Modal(
+              document.getElementById("scopeModal"),
+              {}
+            );
+            myModal.show();
+          },
         },
         mounted() {
           this.shuffle();
           this.shuffle2();
+          this.modalopen();
         },
         computed: {
           // モーダル全選択
@@ -319,7 +330,7 @@
             });
           },
           clear() {
-            if (this.point == this.search_cards.length) {
+            if (this.point != 0 && this.point == this.search_cards.length) {
               return congratulations.play();
             }
           },
