@@ -4,9 +4,13 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- bootstrap -->
     <link rel="stylesheet" href="css/bootstrap.min.css" />
+    <!-- favicon -->
     <link rel="icon" type="image/png" href="asset/favicon.png" sizes="64x64" />
+    <!-- vue.js -->
     <script src="js/vue.js"></script>
+
     <title>Multiplication Table</title>
   </head>
 
@@ -14,7 +18,7 @@
     <section id="app" class="container-fluid">
       <!-- header -->
       <section class="header row bg-white sticky-top">
-        <!-- Button trigger modal -->
+        <!-- trigger modal -->
         <div class="col d-flex">
           <button
             type="button"
@@ -30,19 +34,22 @@
           >
         </div>
 
+        <!-- point -->
         <div class="col text-center m-auto">Point:{{point}}</div>
+
+        <!-- restart -->
         <section class="col text-end m-auto">
           <div class="btn btn-primary btn-sm" @click="allreset">ReStart</div>
         </section>
       </section>
 
-      <!-- ゲームエリア -->
-      <section class="row" v-show="point!=search_cards.length">
-        <!-- 問題カード -->
+      <!-- game area -->
+      <section class="row" v-show="point!=qsearch_cards.length">
+        <!-- Question card -->
         <section class="col-6 alert-info grid p-3">
           <div
-            v-for="(q,index) in search_cards"
-            class="card border-5"
+            v-for="(q,index) in qsearch_cards"
+            class="card border-3"
             :class="{ 'bg-info': q.qback ,back:q.qback,hidden:q.qclear}"
             @click="qflip(index)"
           >
@@ -52,11 +59,11 @@
           <!-- <div id="modal-overlay"></div> -->
         </section>
 
-        <!-- 正解カード -->
+        <!-- Answer card -->
         <section class="col-6 alert-warning grid p-3">
           <div
-            v-for="(a,index) in search_cards2"
-            class="card border-5"
+            v-for="(a,index) in asearch_cards"
+            class="card border-3"
             :class="{ 'bg-warning': a.aback ,back:a.aback,hidden:a.aclear}"
             @click="aflip(index)"
           >
@@ -65,8 +72,10 @@
           </div>
         </section>
       </section>
+
+      <!-- all clear -->
       <section
-        v-show="point!=0 && point==search_cards.length"
+        v-show="point!=0 && point==qsearch_cards.length"
         class="text-center mt-5"
       >
         <h1 class="text-success">Congratulations!</h1>
@@ -84,17 +93,7 @@
       >
         <div class="modal-dialog modal-dialog-centered modal-sm">
           <div class="modal-content">
-            <!-- <div class="modal-header">
-              <h5 class="modal-title" id="scopeModalLabel">title:{{scope}}</h5>
-              <button
-                type="button"
-                class="btn-close"
-                data-bs-dismiss="modal"
-                aria-label="Close"
-              ></button>
-            </div> -->
-
-            <!-- 範囲選択 -->
+            <!-- select scope -->
             <div class="modal-body">
               <table class="table table-sm w-75 m-auto">
                 <tr>
@@ -145,6 +144,7 @@
               </table>
             </div>
 
+            <!-- modal footer -->
             <div class="modal-footer justify-content-center">
               <button
                 type="button"
@@ -160,16 +160,23 @@
       </div>
     </section>
 
+    <!-- for modal -->
     <script src="js/bootstrap.bundle.js"></script>
+
+    <!-- import card data -->
     <script src="js/card.js"></script>
+
+    <!-- vue.js program -->
     <script>
+      // sound
       const flip = new Audio("asset/flip.mp3");
       const good = new Audio("asset/good.mp3");
       const congratulations = new Audio("asset/congratulations.mp3");
+
       var app = new Vue({
         el: "#app",
         data: {
-          //  基礎データ
+          //  base data
           renge: [2, 3, 4, 5, 6, 7, 8, 9],
           scope: [2],
           qselect: false,
@@ -179,37 +186,43 @@
           qnum: "",
           anum: "",
           point: 0,
-          // カード
+          // import card
           card: card,
         },
         methods: {
+          // flip Question card
           qflip(index) {
             if (this.qselect == true) {
             } else {
               flip.play();
-              this.search_cards[index].qback = !this.search_cards[index].qback;
+              this.qsearch_cards[index].qback =
+                !this.qsearch_cards[index].qback;
               this.qindex = index;
-              this.qnum = this.search_cards[index].answer;
+              this.qnum = this.qsearch_cards[index].answer;
               this.qselect = true;
               if (this.qnum != "" && this.anum != "") {
                 this.check();
               }
             }
           },
+
+          // flip Answer card
           aflip(index) {
             if (this.aselect == true) {
             } else {
               flip.play();
-              this.search_cards2[index].aback =
-                !this.search_cards2[index].aback;
+              this.asearch_cards[index].aback =
+                !this.asearch_cards[index].aback;
               this.aindex = index;
-              this.anum = this.search_cards2[index].answer;
+              this.anum = this.asearch_cards[index].answer;
               this.aselect = true;
               if (this.qnum != "" && this.anum != "") {
                 this.check();
               }
             }
           },
+
+          // check Question card & Answer card
           check() {
             if (this.qnum == this.anum) {
               setTimeout(() => {
@@ -217,16 +230,18 @@
                 good.play();
               }, 700);
               setTimeout(() => {
-                this.search_cards[this.qindex].qclear = true;
-                this.search_cards2[this.aindex].aclear = true;
+                this.qsearch_cards[this.qindex].qclear = true;
+                this.asearch_cards[this.aindex].aclear = true;
               }, 1200);
             }
             setTimeout(() => {
               this.reset();
             }, 1200);
           },
+
+          // if check false
           reset() {
-            this.search_cards.forEach((element) => {
+            this.qsearch_cards.forEach((element) => {
               element.qback = true;
               element.aback = true;
             });
@@ -237,8 +252,10 @@
             this.qnum = "";
             this.anum = "";
           },
+
+          // initialize
           allreset() {
-            this.search_cards.forEach((element) => {
+            this.qsearch_cards.forEach((element) => {
               element.qback = true;
               element.aback = true;
               element.qclear = false;
@@ -251,47 +268,59 @@
             this.qnum = "";
             this.anum = "";
             this.point = 0;
-            this.shuffle();
-            this.shuffle2();
+            this.qshuffle();
+            this.ahuffle();
           },
-          //  ランダム化
-          shuffle: function (search_cards) {
-            for (let i = this.search_cards.length - 1; i > 0; i--) {
+
+          // shuffle Question card
+          qshuffle: function (qsearch_cards) {
+            for (let i = this.qsearch_cards.length - 1; i > 0; i--) {
               let r = Math.floor(Math.random() * (i + 1));
-              let tmp = this.search_cards[i];
-              this.search_cards[i] = this.search_cards[r];
-              this.search_cards[r] = tmp;
+              let tmp = this.qsearch_cards[i];
+              this.qsearch_cards[i] = this.qsearch_cards[r];
+              this.qsearch_cards[r] = tmp;
             }
-            return search_cards;
+            return qsearch_cards;
           },
-          shuffle2: function (search_cards2) {
-            for (let i = this.search_cards2.length - 1; i > 0; i--) {
+
+          // shuffle Answer card
+          ashuffle: function (asearch_cards) {
+            for (let i = this.asearch_cards.length - 1; i > 0; i--) {
               let r = Math.floor(Math.random() * (i + 1));
-              let tmp = this.search_cards2[i];
-              this.search_cards2[i] = this.search_cards2[r];
-              this.search_cards2[r] = tmp;
+              let tmp = this.asearch_cards[i];
+              this.asearch_cards[i] = this.asearch_cards[r];
+              this.asearch_cards[r] = tmp;
             }
-            return search_cards2;
+            return asearch_cards;
           },
+
+          // all clear
           congratulations() {
             const congratulations = new Audio("asset/congratulations.mp3");
             congratulations.play();
           },
+
+          // modal setting
           modalopen() {
             var myModal = new bootstrap.Modal(
               document.getElementById("scopeModal"),
-              {}
+              {
+                backdrop: "static",
+              }
             );
             myModal.show();
           },
         },
         mounted() {
-          this.shuffle();
-          this.shuffle2();
+          // initial shuffle
+          this.qshuffle();
+          this.ashuffle();
+
+          // initial modal open
           this.modalopen();
         },
         computed: {
-          // モーダル全選択
+          // modal all select
           selectAll: {
             get() {
               if (this.scope.length == 8) {
@@ -308,7 +337,9 @@
               }
             },
           },
-          search_cards() {
+
+          // modal select Question card
+          qsearch_cards() {
             return card.filter((s) => {
               return (
                 s.type.includes(this.scope[0]) ||
@@ -322,7 +353,9 @@
               );
             });
           },
-          search_cards2() {
+
+          // modal select Answer card
+          asearch_cards() {
             return card.filter((s) => {
               return (
                 s.type.includes(this.scope[0]) ||
@@ -336,8 +369,10 @@
               );
             });
           },
+
+          // all clear
           clear() {
-            if (this.point != 0 && this.point == this.search_cards.length) {
+            if (this.point != 0 && this.point == this.qsearch_cards.length) {
               return congratulations.play();
             }
           },
@@ -346,21 +381,23 @@
     </script>
 
     <style>
+      /* card placement */
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
         grid-gap: 0.5rem;
       }
 
+      /* card size */
       .card {
         height: 3rem;
         text-align: center;
-        /* padding: 0; */
         cursor: pointer;
         transform: rotateY(0deg);
         transition: transform 0.3s;
       }
 
+      /* card back */
       .back {
         background-size: 60px 55px;
         background-image: radial-gradient(
@@ -380,25 +417,10 @@
         transition: transform 0.3s;
       }
 
+      /* clear card hidden */
       .hidden {
         visibility: hidden;
       }
-
-      /* #modal-overlay {
-        z-index: 1;
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 120%;
-        background-color: rgba(0, 0, 0, 0.75);
-        width: 100%;
-        height: 120%;
-        position: fixed;
-        top: 0;
-        left: 0;
-      } */
     </style>
   </body>
 </html>
